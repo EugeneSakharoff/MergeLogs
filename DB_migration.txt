@@ -1,0 +1,53 @@
+1. Создать вторую таблицу 
+CREATE TABLE names (
+    id int NOT NULL AUTO_INCREMENT,
+    name str,
+); 
+2. заполнить ее уникальными значениями name:
+INSERT INTO names
+     (name)
+     SELECT DISTINCT name
+     FROM table1;
+
+3. В первую таблицу добавить колонку id_name 
+ALTER TABLE table1
+ADD id_name int;
+
+UPDATE
+    table1
+SET
+    table1.col1 = names.id,
+FROM
+    table1 AS a
+    INNER JOIN names AS b
+        ON a.name = b.name
+
+4. В пишуших сервисах заменить запросы на 
+   IF NOT EXISTS (SELECT * FROM names 
+                   WHERE names.name = name
+   BEGIN
+       INSERT INTO names (name)
+       VALUES (name)
+   END
+   
+   (Добавляем в таблицу names если там нет такого имени)
+   
+	INSERT INTO table1(...,name_id,name,...) 
+	VALUES (..., SELECT name_id FROM names WHERE names.name=name, name)
+	FROM table1
+	JOIN names
+	ON table1.id_name = names.id
+	(Добавляем в основную таблицу. Пишем оба поля(name и id_name))
+	
+4. В читающих сервисах заменить запросы на 
+	SELECT ....
+	FROM table1
+	JOIN names
+	ON table1.id_name = names.id
+	
+6. В пишуших сервисах убрать из запросов поле table1.name (работать только с id_name)
+
+7. Удалить table1.name
+	ALTER TABLE table1
+	DROP COLUMN name;
+
